@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "createdAt": "2026-10-23T11:06:00.000Z",
+  "updatedAt": "2026-10-25T12:35:31.663Z",
+  "masterAdmin": {
+    "email": "admin@proxima.network",
+    "name": "Master Super Admin",
+    "passwordHash": "7d601c931c9a89456f78fe6353181d0e8285e61e9609c64481f603bd59b2382d"
+  },
+  "chapterAdmins": [
+    {
+      "id": "admin-titans",
+      "chapterId": "chap-titans",
+      "chapterSlug": "chennai-demo",
+      "chapterName": "Chennai - Demo",
+      "email": "titans.admin@proxima.network",
+      "passwordHash": "8f7f4f09bafeb9989ca0c11c6012e24167b889abbbca909f8f2e850bcb464d2c"
+    },
+    {
+      "id": "admin-blr-central",
+      "chapterId": "chap-blr-central",
+      "chapterSlug": "bangalore-demo",
+      "chapterName": "Bangalore Demo",
+      "email": "bengaluru.admin@proxima.network",
+      "passwordHash": "736fcdb9dcd28d11b459ec7cb9903bfa45e684af4a169cfff2a573250eb88502"
+    },
+    {
+      "id": "admin-mumbai-apex",
+      "chapterId": "chap-mumbai-apex",
+      "chapterSlug": "mumbai-demo",
+      "chapterName": "Mumbai Demo",
+      "email": "mumbai.admin@proxima.network",
+      "passwordHash": "47c5caa2ef08a470363bc48c6ce5a2fe6c7c0c8a5a4cb95c513908dfbb2a7fd0"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "chap-titans",
+      "slug": "chennai-demo",
+      "name": "Chennai - Demo",
+      "organizationType": "Executive Demo",
+      "city": "Chennai",
+      "accessKey": "px_7b9f3e1a8d4c205e81d6f03a",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "chap-blr-central",
+      "slug": "bangalore-demo",
+      "name": "Bangalore Demo",
+      "organizationType": "Executive Demo",
+      "city": "Bengaluru",
+      "accessKey": "px_3e71d80b5a942cf6a14e908b",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "chap-mumbai-apex",
+      "slug": "mumbai-demo",
+      "name": "Mumbai Demo",
+      "organizationType": "Executive Demo",
+      "city": "Mumbai",
+      "accessKey": "px_80d4f17a9e25bc36e7192a54",
+      "status": "ACTIVE"
+    }
+  ],
+  "licenses": {
+    "chap-mvnt9dkm": {
+      "chapterId": "chap-mvnt9dkm",
+      "status": "ACTIVE",
+      "validUntil": "2027-10-25T12:35:31.601Z",
+      "invoices": [
+        {
+          "id": "inv_mvnt9e35",
+          "date": "25 Oct 2026",
+          "amount": 1999,
+          "plan": "Annual Chapter License (1 Year)",
+          "paymentId": "pay_rzp_sandbox_mvnt9e2s",
+          "orderId": "order_mvnt9dlh_d517b18f7e41",
+          "status": "PAID"
+        }
+      ],
+      "plan": "Annual Chapter License (₹1,999 / 1 Year)",
+      "priceInr": 1999,
+      "lastPaymentDate": "2026-10-25T12:35:31.663Z",
+      "lastPaymentId": "pay_rzp_sandbox_mvnt9e2s",
+      "lastOrderId": "order_mvnt9dlh_d517b18f7e41"
+    }
+  },
+  "members": {},
+  "vipPasses": [],
+  "auditLog": [
+    {
+      "action": "LICENSE_RENEWED",
+      "chapterId": "chap-mvnt9dkm",
+      "planKey": "ANNUAL",
+      "amount": 1999,
+      "paymentId": "pay_rzp_sandbox_mvnt9e2s",
+      "timestamp": "2026-10-25T12:35:31.663Z"
+    }
+  ]
+}

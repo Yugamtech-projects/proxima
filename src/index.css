@@ -1,0 +1,620 @@
+@import "tailwindcss";
+
+/* ========================================================================= */
+/* BESPOKE ENTERPRISE TYPOGRAPHY: MICROSOFT APTOS TYPE SUITE                */
+/* ========================================================================= */
+
+@font-face {
+  font-family: 'Aptos';
+  src: url('/fonts/Aptos.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aptos';
+  src: url('/fonts/Aptos-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aptos';
+  src: url('/fonts/Aptos-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aptos';
+  src: url('/fonts/Aptos-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aptos';
+  src: url('/fonts/Aptos-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aptos Display';
+  src: url('/fonts/Aptos-Display.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aptos Display';
+  src: url('/fonts/Aptos-Display-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aptos Mono';
+  src: url('/fonts/Aptos-Mono.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aptos Mono';
+  src: url('/fonts/Aptos-Mono-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@layer base {
+  :root {
+    --ios-bg: #F8F9FC;
+    --ios-glass: rgba(255, 255, 255, 0.85);
+    --ios-glass-card: rgba(255, 255, 255, 0.92);
+    --ios-border: rgba(0, 0, 0, 0.06);
+    --ios-border-highlight: rgba(255, 255, 255, 0.98);
+    --ios-blue: #0071E3;
+    --ios-blue-hover: #0077ED;
+    --ios-text-primary: #0F172A;
+    --ios-text-secondary: #64748B;
+  }
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--ios-bg);
+  color: var(--ios-text-primary);
+  font-family: 'Aptos', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  letter-spacing: -0.01em;
+}
+
+/* Authentic Executive Display Typography */
+.font-display {
+  font-family: 'Aptos Display', 'Aptos', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.font-mono-num {
+  font-family: 'Aptos Mono', ui-monospace, monospace;
+  font-feature-settings: "tnum" 1;
+}
+
+#root {
+  min-height: 100%;
+  width: 100%;
+}
+
+/* Safe Area Insets for iPhone Dynamic Island and Notches */
+.pt-safe {
+  padding-top: max(12px, env(safe-area-inset-top));
+}
+.pb-safe {
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+/* ========================================================================= */
+/* PRODUCTION-GRADE APPLE-INSPIRED SURFACES & REFINED ELEVATION             */
+/* ========================================================================= */
+
+.ios-glass {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 
+    0 4px 20px -2px rgba(15, 23, 42, 0.04),
+    0 1px 3px 0 rgba(15, 23, 42, 0.02);
+}
+
+.ios-glass-card {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.95),
+    0 4px 18px -2px rgba(15, 23, 42, 0.04),
+    0 1px 2px 0 rgba(15, 23, 42, 0.02);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ios-glass-card:hover {
+  transform: translateY(-1.5px);
+  background: #FFFFFF;
+  border-color: rgba(0, 113, 227, 0.25);
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 1),
+    0 14px 30px -4px rgba(15, 23, 42, 0.07),
+    0 2px 6px -1px rgba(0, 113, 227, 0.06);
+}
+
+.ios-glass-dark {
+  background: #0F172A;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4);
+}
+
+.ios-glass-sheet {
+  background: #FFFFFF;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 -12px 32px -4px rgba(15, 23, 42, 0.08);
+}
+
+/* Apple Haptic Button Press Effect */
+.ios-press {
+  transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.16s ease;
+}
+.ios-press:active {
+  transform: scale(0.975);
+  opacity: 0.94;
+}
+
+/* Luxury Gradient Text */
+.text-gradient-hero {
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 60%, #334155 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-blue {
+  background: linear-gradient(135deg, #0071E3 0%, #0077ED 60%, #0284C7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Production-Grade Primary Button */
+.btn-proxima-primary {
+  position: relative;
+  background: linear-gradient(180deg, #0077ED 0%, #0066CC 100%);
+  color: #FFFFFF;
+  font-weight: 600;
+  border: 1px solid rgba(0, 85, 179, 0.7);
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.32),
+    0 4px 14px -1px rgba(0, 102, 204, 0.42),
+    0 1px 2px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-proxima-primary:hover {
+  background: linear-gradient(180deg, #0A84FF 0%, #0071E3 100%);
+  transform: translateY(-1px);
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.45),
+    0 8px 22px -2px rgba(0, 102, 204, 0.48),
+    0 2px 4px 0 rgba(0, 0, 0, 0.12);
+}
+
+.btn-proxima-primary:active {
+  background: #0062C4;
+  transform: translateY(0.5px);
+  box-shadow: 
+    inset 0 2px 4px 0 rgba(0, 0, 0, 0.22),
+    0 2px 8px 0 rgba(0, 113, 227, 0.3);
+}
+
+/* Tactile Apple-Grade Input & Field Depth */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="search"],
+select,
+textarea {
+  box-shadow: 
+    inset 0 1.5px 2.5px 0 rgba(15, 23, 42, 0.05),
+    inset 0 0 0 1px rgba(15, 23, 42, 0.03),
+    0 1px 1px 0 rgba(255, 255, 255, 0.8);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="number"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
+input[type="search"]:focus,
+select:focus,
+textarea:focus {
+  box-shadow: 
+    inset 0 1px 2px 0 rgba(15, 23, 42, 0.04),
+    0 0 0 3px rgba(0, 113, 227, 0.16),
+    0 1px 2px 0 rgba(0, 0, 0, 0.04);
+}
+
+/* Global Tactile Depth for Primary Blue Buttons */
+button[class*="bg-[#0071E3]"]:not(.no-depth) {
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.15),
+    0 3px 10px -1px rgba(0, 113, 227, 0.35),
+    0 1px 2px 0 rgba(0, 0, 0, 0.08);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+button[class*="bg-[#0071E3]"]:not(.no-depth):hover {
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.18),
+    0 6px 18px -2px rgba(0, 113, 227, 0.45),
+    0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  transform: translateY(-0.5px);
+}
+button[class*="bg-[#0071E3]"]:not(.no-depth):active {
+  transform: translateY(0.5px);
+  box-shadow: 
+    inset 0 2px 4px 0 rgba(0, 0, 0, 0.22),
+    0 1px 3px 0 rgba(0, 113, 227, 0.25);
+}
+
+/* Global Tactile Depth for Secondary White Buttons */
+button.ios-press.bg-white:not(.no-depth),
+.btn-depth-secondary {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+  color: #0F172A;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 0 rgba(15, 23, 42, 0.04),
+    0 1px 3px 0 rgba(15, 23, 42, 0.06),
+    0 1px 2px 0 rgba(15, 23, 42, 0.03);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+button.ios-press.bg-white:not(.no-depth):hover,
+.btn-depth-secondary:hover {
+  background: #FFFFFF;
+  border-color: rgba(15, 23, 42, 0.22);
+  transform: translateY(-0.5px);
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 1),
+    0 4px 12px -1px rgba(15, 23, 42, 0.08),
+    0 1px 2px 0 rgba(15, 23, 42, 0.04);
+}
+button.ios-press.bg-white:not(.no-depth):active,
+.btn-depth-secondary:active {
+  background: #F1F5F9;
+  transform: translateY(0.5px);
+  box-shadow: inset 0 1.5px 3px 0 rgba(15, 23, 42, 0.1);
+}
+
+/* Tactile Selected Pill Depth */
+.btn-depth-selected {
+  background: linear-gradient(180deg, #EFF6FF 0%, #DBEAFE 100%);
+  color: #0071E3;
+  border: 1.5px solid #0071E3;
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.8),
+    0 2px 8px -1px rgba(0, 113, 227, 0.22);
+}
+
+/* Tactile Card Depth */
+.card-depth-selectable {
+  background: #FFFFFF;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.9),
+    0 2px 6px -1px rgba(15, 23, 42, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card-depth-selectable:hover {
+  border-color: rgba(15, 23, 42, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 1),
+    0 6px 16px -2px rgba(15, 23, 42, 0.08);
+}
+.card-depth-selected {
+  background: linear-gradient(180deg, #F0F7FF 0%, #E6F2FF 100%);
+  border: 2px solid #0071E3;
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.9),
+    0 6px 20px -2px rgba(0, 113, 227, 0.22),
+    0 1px 3px 0 rgba(0, 113, 227, 0.1);
+}
+
+/* Custom Sleek Scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ========================================================================= */
+/* ADVANCED ANIMATION SUITE (Float, Sonar, Specular Glow)                   */
+/* ========================================================================= */
+
+@keyframes aurora-breathe {
+  0%, 100% {
+    transform: scale(1) translate(0px, 0px);
+    opacity: 0.65;
+  }
+  33% {
+    transform: scale(1.15) translate(25px, -20px);
+    opacity: 0.85;
+  }
+  66% {
+    transform: scale(0.92) translate(-20px, 15px);
+    opacity: 0.55;
+  }
+}
+
+.animate-aurora-1 {
+  animation: aurora-breathe 18s ease-in-out infinite;
+}
+
+.animate-aurora-2 {
+  animation: aurora-breathe 24s ease-in-out infinite reverse;
+}
+
+.animate-aurora-3 {
+  animation: aurora-breathe 21s ease-in-out infinite 3s;
+}
+
+@keyframes orbit-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-orbit-slow {
+  animation: orbit-slow 30s linear infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 25px 2px rgba(0, 113, 227, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 45px 8px rgba(56, 189, 248, 0.45);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+
+@keyframes line-flow {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-line-flow {
+  stroke-dasharray: 8 12;
+  animation: line-flow 15s linear infinite;
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(0.4deg);
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+@keyframes sonar-wave {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.45;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.animate-sonar-wave {
+  animation: sonar-wave 3.2s cubic-bezier(0.1, 0.7, 0.1, 1) infinite;
+}
+
+.animate-sonar-wave-delay {
+  animation: sonar-wave 3.2s cubic-bezier(0.1, 0.7, 0.1, 1) infinite 1.4s;
+}
+
+@keyframes laser-scan {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes map-drift {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(-30px, -15px, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-map-drift {
+  animation: map-drift 45s ease-in-out infinite alternate;
+}
+
+/* MapLibre Controls Apple Styling */
+.maplibregl-ctrl-group {
+  border-radius: 22px !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(32px) saturate(220%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(220%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 
+    0 12px 32px rgba(15, 23, 42, 0.08), 
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset !important;
+  overflow: hidden;
+}
+
+.maplibregl-ctrl-group button {
+  width: 42px !important;
+  height: 42px !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+  transition: all 0.15s ease !important;
+}
+
+.maplibregl-ctrl-group button:last-child {
+  border-bottom: none !important;
+}
+
+.maplibregl-ctrl-group button:hover {
+  background-color: rgba(0, 113, 227, 0.06) !important;
+}
+
+/* Custom Marker Styling Animations */
+@keyframes ios-pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 113, 227, 0.5);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 18px rgba(0, 113, 227, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 113, 227, 0);
+  }
+}
+
+.marker-pulse {
+  animation: ios-pulse 2.4s infinite cubic-bezier(0.45, 0, 0.55, 1);
+}
+
+/* ========================================================================= */
+/* MAP RETINA SHARPNESS & HIGH-DPI CANVAS OPTIMIZATION                      */
+/* ========================================================================= */
+
+.maplibregl-canvas-container,
+.maplibregl-canvas {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Proxima VisionOS MapLibre Elegant Popup Styling */
+.proxima-elegant-popup {
+  z-index: 40 !important;
+  max-width: 360px !important;
+}
+
+.proxima-elegant-popup .maplibregl-popup-content {
+  background: transparent !important;
+  padding: 0 !important;
+  border-radius: 24px !important;
+  box-shadow: none !important;
+}
+
+.proxima-elegant-popup .maplibregl-popup-tip {
+  border-top-color: rgba(255, 255, 255, 0.98) !important;
+  filter: drop-shadow(0 4px 8px rgba(15, 23, 42, 0.12));
+}
+
+.proxima-popup-card {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(40px) saturate(220%);
+  -webkit-backdrop-filter: blur(40px) saturate(220%);
+  border: 1px solid rgba(255, 255, 255, 0.98);
+  border-radius: 24px;
+  box-shadow: 
+    0 24px 50px -10px rgba(15, 23, 42, 0.22),
+    0 10px 20px -5px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(0, 0, 0, 0.06),
+    0 1px 0 0 rgba(255, 255, 255, 1) inset;
+  padding: 16px;
+  width: 330px;
+  animation: popup-spring-in 0.3s cubic-bezier(0.16, 1.25, 0.38, 1);
+  transform-origin: bottom center;
+}
+
+@keyframes popup-spring-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Fluid Animated Gradient Text Shimmer */
+@keyframes gradient-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient-shimmer {
+  animation: gradient-shimmer 4.5s ease-in-out infinite;
+}
+
+

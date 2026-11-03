@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "createdAt": "2026-10-23T11:06:00.000Z",
+  "updatedAt": "2026-10-23T12:58:19.969Z",
+  "masterAdmin": {
+    "email": "admin@proxima.network",
+    "name": "Master Super Admin",
+    "passwordHash": "7d601c931c9a89456f78fe6353181d0e8285e61e9609c64481f603bd59b2382d"
+  },
+  "chapterAdmins": [
+    {
+      "id": "admin-titans",
+      "chapterId": "chap-titans",
+      "chapterSlug": "chennai-titans",
+      "email": "titans.admin@proxima.network",
+      "passwordHash": "8f7f4f09bafeb9989ca0c11c6012e24167b889abbbca909f8f2e850bcb464d2c"
+    },
+    {
+      "id": "admin-blr-central",
+      "chapterId": "chap-blr-central",
+      "chapterSlug": "bengaluru-central",
+      "email": "bengaluru.admin@proxima.network",
+      "passwordHash": "736fcdb9dcd28d11b459ec7cb9903bfa45e684af4a169cfff2a573250eb88502"
+    },
+    {
+      "id": "admin-mumbai-apex",
+      "chapterId": "chap-mumbai-apex",
+      "chapterSlug": "mumbai-apex",
+      "email": "mumbai.admin@proxima.network",
+      "passwordHash": "47c5caa2ef08a470363bc48c6ce5a2fe6c7c0c8a5a4cb95c513908dfbb2a7fd0"
+    },
+    {
+      "id": "admin-chap-mvkz70ks",
+      "chapterId": "chap-mvkz70ks",
+      "chapterSlug": "coimbatore-titans",
+      "chapterName": "Coimbatore Titans",
+      "email": "coimbatore.admin@proxima.network",
+      "passwordHash": "b807508284c71e0c964e62bcf819e299bac2c90946edd5257ed48ce073c7d03a",
+      "role": "CHAPTER_ADMIN"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "chap-titans",
+      "slug": "chennai-titans",
+      "name": "Chennai Titans Chapter",
+      "city": "Chennai",
+      "accessKey": "px_7b9f3e1a8d4c205e81d6f03a",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "chap-blr-central",
+      "slug": "bengaluru-central",
+      "name": "Bengaluru Central Chapter",
+      "city": "Bengaluru",
+      "accessKey": "px_3e71d80b5a942cf6a14e908b",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "chap-mumbai-apex",
+      "slug": "mumbai-apex",
+      "name": "Mumbai Apex Chapter",
+      "city": "Mumbai",
+      "accessKey": "px_80d4f17a9e25bc36e7192a54",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "chap-mvkz70ks",
+      "slug": "coimbatore-titans",
+      "name": "Coimbatore Titans",
+      "city": "Coimbatore",
+      "accessKey": "px_24c3124943452f5580cc1254",
+      "status": "ACTIVE",
+      "isPrototype": true,
+      "createdAt": "2026-10-23T12:58:19.948Z"
+    }
+  ],
+  "licenses": {
+    "chap-mvkz70ks": {
+      "chapterId": "chap-mvkz70ks",
+      "status": "ACTIVE",
+      "plan": "Complimentary Prototype Pass (₹0 / 1 Year Free)",
+      "priceInr": 0,
+      "validUntil": "2027-10-23T12:58:19.948Z",
+      "lastPaymentDate": "2026-10-23T12:58:19.969Z",
+      "lastPaymentId": "free_credit_mvkz70lc",
+      "lastOrderId": "free_vip_pass",
+      "isComplimentary": true,
+      "invoices": [
+        {
+          "id": "inv_mvkz70ks",
+          "date": "23 Oct 2026",
+          "amount": 0,
+          "plan": "Complimentary Prototype Pass (100% Team Credit)",
+          "paymentId": "free_credit_mvkz70lc",
+          "orderId": "free_vip_pass",
+          "status": "PAID"
+        }
+      ]
+    }
+  },
+  "members": {},
+  "vipPasses": [
+    {
+      "id": "pass-team-credit",
+      "token": "free_prototype_credit_2026",
+      "label": "Yugam Team Credit / Working Prototype Pass",
+      "maxUses": 5,
+      "usedCount": 0,
+      "planDays": 365,
+      "createdAt": "2026-10-23T11:20:00.000Z"
+    },
+    {
+      "id": "pass_mvkz5ho8",
+      "token": "free_pass_123106848d73",
+      "label": "Team Credit / Working Prototype",
+      "maxUses": 2,
+      "usedCount": 1,
+      "planDays": 365,
+      "createdAt": "2026-10-23T12:57:08.792Z"
+    }
+  ],
+  "auditLog": [
+    {
+      "action": "CHAPTER_ONBOARDED_VIP_FREE",
+      "chapterId": "chap-mvkz70ks",
+      "chapterName": "Coimbatore Titans",
+      "vipToken": "free_pass_123106848d73",
+      "planKey": "SEMI_ANNUAL",
+      "timestamp": "2026-10-23T12:58:19.969Z"
+    }
+  ]
+}
