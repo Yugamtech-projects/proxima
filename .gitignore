@@ -26,3 +26,6 @@ dist-ssr
 .env
 .env.*
 !.env.example
+gemini-session-1.json
+__pycache__
+.venv

@@ -1,0 +1,36 @@
+"""Configuration package for Proxima backend."""
+from .config import (
+    CHAPTERS_TABLE,
+    USERS_TABLE,
+    MEMBERS_TABLE,
+    LICENSES_TABLE,
+    DATABASE_URL,
+    DEV_ENV,
+    DATABASE_SCHEMA,
+    PORT,
+    HOST,
+    JWT_SECRET,
+    JWT_ALGORITHM,
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    RAZORPAY_KEY_ID,
+    RAZORPAY_KEY_SECRET,
+    RAZORPAY_WEBHOOK_SECRET,
+)
+
+__all__ = [
+    "CHAPTERS_TABLE",
+    "USERS_TABLE",
+    "MEMBERS_TABLE",
+    "LICENSES_TABLE",
+    "DATABASE_URL",
+    "DEV_ENV",
+    "DATABASE_SCHEMA",
+    "PORT",
+    "HOST",
+    "JWT_SECRET",
+    "JWT_ALGORITHM",
+    "ACCESS_TOKEN_EXPIRE_MINUTES",
+    "RAZORPAY_KEY_ID",
+    "RAZORPAY_KEY_SECRET",
+    "RAZORPAY_WEBHOOK_SECRET",
+]

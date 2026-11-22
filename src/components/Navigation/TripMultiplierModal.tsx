@@ -8,7 +8,6 @@ import {
   ExternalLink,
   MapPin,
   Clock,
-  ArrowRight,
 } from 'lucide-react'
 import type { Member } from '../../types/member'
 import {

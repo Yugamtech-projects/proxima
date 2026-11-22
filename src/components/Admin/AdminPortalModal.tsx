@@ -217,7 +217,7 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
   }, [allChaptersList])
 
   // Top level chapter scope: 'LIVE' (Created Chapters by Forum) | 'DEMO' (Sandbox Demos)
-  const [chapterWorkspaceMode, setChapterWorkspaceMode] = useState<'LIVE' | 'DEMO'>(() => {
+  const [, setChapterWorkspaceMode] = useState<'LIVE' | 'DEMO'>(() => {
     if (contextChapter) {
       return isDemoChapter(contextChapter) ? 'DEMO' : 'LIVE'
     }
@@ -244,92 +244,6 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
   const [directorySearchQuery, setDirectorySearchQuery] = useState('')
 
   const setMasterAdminSelectedChapterId = (id: string | null) => setSelectedChapterId(id)
-
-  // Group live chapters by business forum / organization type
-  const groupedLiveChapters = React.useMemo(() => {
-    const map: Record<string, Chapter[]> = {}
-    liveCreatedChapters.forEach((ch) => {
-      const org = ch.organizationType?.trim() || 'Independent Forum'
-      if (!map[org]) {
-        map[org] = []
-      }
-      map[org].push(ch)
-    })
-    return map
-  }, [liveCreatedChapters])
-
-  const handleSwitchWorkspaceMode = (mode: 'LIVE' | 'DEMO') => {
-    setChapterWorkspaceMode(mode)
-    if (mode === 'LIVE') {
-      if (liveCreatedChapters.length > 0) {
-        if (isDemoChapter(effectiveChapter)) {
-          setMasterAdminSelectedChapterId(liveCreatedChapters[0].id)
-        }
-      }
-    } else {
-      if (!isDemoChapter(effectiveChapter)) {
-        if (demoChapters.length > 0) {
-          setMasterAdminSelectedChapterId(demoChapters[0].id)
-        }
-      }
-    }
-  }
-
-  const getForumBadgeStyle = (orgType: string) => {
-    const lower = orgType.toLowerCase()
-    if (lower.includes('bni')) {
-      return {
-        bg: 'bg-rose-50',
-        border: 'border-rose-200',
-        text: 'text-rose-700',
-        badge: 'bg-rose-600 text-white',
-        dot: 'bg-rose-500',
-      }
-    }
-    if (lower.includes('cni')) {
-      return {
-        bg: 'bg-indigo-50',
-        border: 'border-indigo-200',
-        text: 'text-indigo-700',
-        badge: 'bg-indigo-600 text-white',
-        dot: 'bg-indigo-500',
-      }
-    }
-    if (lower.includes('rotary')) {
-      return {
-        bg: 'bg-sky-50',
-        border: 'border-sky-200',
-        text: 'text-sky-800',
-        badge: 'bg-sky-600 text-white',
-        dot: 'bg-sky-500',
-      }
-    }
-    if (lower.includes('tie') || lower.includes('indus')) {
-      return {
-        bg: 'bg-emerald-50',
-        border: 'border-emerald-200',
-        text: 'text-emerald-800',
-        badge: 'bg-emerald-600 text-white',
-        dot: 'bg-emerald-500',
-      }
-    }
-    if (lower.includes('lion')) {
-      return {
-        bg: 'bg-amber-50',
-        border: 'border-amber-200',
-        text: 'text-amber-800',
-        badge: 'bg-amber-600 text-white',
-        dot: 'bg-amber-500',
-      }
-    }
-    return {
-      bg: 'bg-purple-50',
-      border: 'border-purple-200',
-      text: 'text-purple-800',
-      badge: 'bg-purple-600 text-white',
-      dot: 'bg-purple-500',
-    }
-  }
 
   // Determine Effective Chapter
   const effectiveChapter: Chapter = (() => {

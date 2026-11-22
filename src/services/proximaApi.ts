@@ -77,7 +77,7 @@ export async function loginWithServer(loginId: string, passwordPlain: string): P
     const res = await fetch(`${API_BASE}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ loginId, password: passwordPlain }),
+      body: JSON.stringify({ login_id: loginId, loginId, password: passwordPlain }),
       signal: AbortSignal.timeout(4000),
     })
     if (res.ok) {
@@ -214,7 +214,7 @@ export interface VipPass {
  */
 export async function fetchVipPasses(): Promise<VipPass[]> {
   try {
-    const res = await fetch(`${API_BASE}/api/vip-passes`, {
+    const res = await fetch(`${API_BASE}/api/licensing/vip-passes`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -241,7 +241,7 @@ export async function createVipPassLink(
   planDays: number = 365
 ): Promise<{ success: boolean; pass?: VipPass } | null> {
   try {
-    const res = await fetch(`${API_BASE}/api/vip-passes`, {
+    const res = await fetch(`${API_BASE}/api/licensing/vip-passes`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
