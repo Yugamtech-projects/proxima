@@ -1,2 +1,5 @@
+# API Proxy to Render Backend (Eliminates CORS)
+/api/*  https://proxima-backend-vd5h.onrender.com/api/:splat  200!
+
 # Single Page Application fallback rule for static hosting
-/*    /index.html   200
+/*      /index.html                                            200
