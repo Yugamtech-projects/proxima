@@ -321,8 +321,13 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return
 
-    const initialCenter = triggerFlightAnimation ? INDIA_CENTER : activeChapter.centerCoordinates
-    const initialZoom = triggerFlightAnimation ? INDIA_ZOOM : activeChapter.defaultZoom
+    const safeCenter: [number, number] =
+      activeChapter?.centerCoordinates && Array.isArray(activeChapter.centerCoordinates) && activeChapter.centerCoordinates.length >= 2
+        ? activeChapter.centerCoordinates
+        : [80.2155, 13.0878]
+
+    const initialCenter = triggerFlightAnimation ? INDIA_CENTER : safeCenter
+    const initialZoom = triggerFlightAnimation ? INDIA_ZOOM : activeChapter?.defaultZoom || 12.2
 
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
@@ -377,8 +382,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         setIsFlightActive(true)
         setTimeout(() => {
           map.flyTo({
-            center: activeChapter.centerCoordinates,
-            zoom: activeChapter.defaultZoom || 12.2,
+            center: safeCenter,
+            zoom: activeChapter?.defaultZoom || 12.2,
             speed: 0.52, // Majestic, immersive glide across the subcontinent
             curve: 1.45,
             duration: 4200,
@@ -453,11 +458,16 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   // Smoothly pan & zoom whenever active chapter changes (if not in initial flight)
   useEffect(() => {
     const map = mapRef.current
-    if (!map || isFlightActive) return
+    if (!map || isFlightActive || !activeChapter) return
+
+    const chapterCenter: [number, number] =
+      activeChapter.centerCoordinates && Array.isArray(activeChapter.centerCoordinates) && activeChapter.centerCoordinates.length >= 2
+        ? activeChapter.centerCoordinates
+        : [80.2155, 13.0878]
 
     map.flyTo({
-      center: activeChapter.centerCoordinates,
-      zoom: activeChapter.defaultZoom,
+      center: chapterCenter,
+      zoom: activeChapter.defaultZoom || 12.2,
       speed: 1.0,
       curve: 1.4,
       essential: true,
@@ -627,17 +637,22 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     const map = mapRef.current
     if (!map || isFlightActive) return
 
+    const chapterCenter: [number, number] =
+      activeChapter?.centerCoordinates && Array.isArray(activeChapter.centerCoordinates) && activeChapter.centerCoordinates.length >= 2
+        ? activeChapter.centerCoordinates
+        : [80.2155, 13.0878]
+
     // Resolve geographic anchor (Destination Area > User GPS > Explicit Anchor > Chapter Center)
     const anchorLng =
       destinationLocation?.longitude ??
       userLocation?.longitude ??
       anchorPoint?.longitude ??
-      activeChapter.centerCoordinates[0]
+      chapterCenter[0]
     const anchorLat =
       destinationLocation?.latitude ??
       userLocation?.latitude ??
       anchorPoint?.latitude ??
-      activeChapter.centerCoordinates[1]
+      chapterCenter[1]
 
     // 1. Update visual radar circle GeoJSON
     const updateRadarCircle = () => {

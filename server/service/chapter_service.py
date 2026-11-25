@@ -20,6 +20,7 @@ from auth.password import get_password_hash
 from schemas.chapter import ChapterOnboardRequest, ChapterUpdateRequest
 from schemas.license import LICENSE_PLAN_TITLES
 from service.vip_pass_service import VipPassService
+from service.spatial_service import SpatialService
 from utils.crypto import (
     generate_chapter_access_key,
     generate_secure_token,
@@ -72,7 +73,13 @@ class ChapterService:
             pagination_sql += f" OFFSET {offset}"
 
         select_chapters_query = f"""
-            SELECT * FROM {CHAPTERS_TABLE}
+            SELECT 
+                id, slug, name, organization_type, city, access_key, status, default_zoom, created_at, updated_at,
+                CASE 
+                    WHEN center_coordinates IS NOT NULL THEN json_build_array(ST_X(center_coordinates::geometry), ST_Y(center_coordinates::geometry))
+                    ELSE NULL
+                END as center_coordinates
+            FROM {CHAPTERS_TABLE}
             {where_sql}
             ORDER BY name ASC
             {pagination_sql}
@@ -120,6 +127,12 @@ class ChapterService:
         chapter_id = f"chap-{generate_secure_token(nbytes=4)}"
         access_key = generate_chapter_access_key()
 
+        if payload.center_coordinates and len(payload.center_coordinates) >= 2:
+            lon = float(payload.center_coordinates[0])
+            lat = float(payload.center_coordinates[1])
+        else:
+            lon, lat = SpatialService.resolve_city_coordinates(city=payload.city)
+
         new_chapter = {
             "id": chapter_id,
             "slug": clean_slug,
@@ -128,13 +141,26 @@ class ChapterService:
             "city": payload.city.strip(),
             "access_key": access_key,
             "status": "ACTIVE",
+            "center_coordinates": [lon, lat],
+            "default_zoom": 12,
+        }
+
+        insert_chapter_params = {
+            "id": chapter_id,
+            "slug": clean_slug,
+            "name": payload.chapter_name.strip(),
+            "organization_type": payload.organization_type or "Business Forum",
+            "city": payload.city.strip(),
+            "access_key": access_key,
+            "status": "ACTIVE",
+            "lon": lon,
+            "lat": lat,
         }
 
         insert_chapter_query = f"""
-            INSERT INTO {CHAPTERS_TABLE} (id, slug, name, organization_type, city, access_key, status)
-            VALUES (:id, :slug, :name, :organization_type, :city, :access_key, :status)
+            INSERT INTO {CHAPTERS_TABLE} (id, slug, name, organization_type, city, access_key, status, center_coordinates)
+            VALUES (:id, :slug, :name, :organization_type, :city, :access_key, :status, ST_SetSRID(ST_MakePoint(:lon, :lat), 4326))
         """
-        insert_chapter_params = new_chapter
         await DatabaseManager.execute_db_insert(query=insert_chapter_query, params=insert_chapter_params)
 
         clean_login = payload.admin_login_id.strip().lower()

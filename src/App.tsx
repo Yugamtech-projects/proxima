@@ -308,7 +308,29 @@ export function App() {
       url.searchParams.set('c', ch.accessKey)
       window.history.pushState({}, '', url.toString())
     } else {
-      setInvalidTokenAttempt(tokenOrSlug)
+      fetchChapterByTokenFromServer(tokenOrSlug).then((serverCh) => {
+        if (serverCh) {
+          const normalized: Chapter = {
+            ...serverCh,
+            centerCoordinates:
+              serverCh.centerCoordinates && Array.isArray(serverCh.centerCoordinates) && serverCh.centerCoordinates.length >= 2
+                ? serverCh.centerCoordinates
+                : [80.2155, 13.0878],
+            defaultZoom: serverCh.defaultZoom || 12.5,
+          }
+          setActiveChapter(normalized)
+          setInvalidTokenAttempt(null)
+          sessionStorage.setItem('proxima_active_token', normalized.accessKey)
+          const url = new URL(window.location.href)
+          url.searchParams.delete('chapter')
+          url.searchParams.delete('token')
+          url.searchParams.delete('key')
+          url.searchParams.set('c', normalized.accessKey)
+          window.history.pushState({}, '', url.toString())
+        } else {
+          setInvalidTokenAttempt(tokenOrSlug)
+        }
+      })
     }
   }
 

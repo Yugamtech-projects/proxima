@@ -22,6 +22,40 @@ class SpatialService:
     """Class-based service for all geospatial algorithms and map coordinate resolution."""
 
     @staticmethod
+    def resolve_city_coordinates(city: str) -> Tuple[float, float]:
+        """Resolves default geographic center [longitude, latitude] for major business hub cities."""
+        city_lookup = {
+            "chennai": (80.2155, 13.0878),
+            "bengaluru": (77.5946, 12.9716),
+            "bangalore": (77.5946, 12.9716),
+            "mumbai": (72.8777, 19.0760),
+            "hyderabad": (78.4867, 17.3850),
+            "coimbatore": (76.9754, 11.0067),
+            "pune": (73.8567, 18.5204),
+            "delhi": (77.2090, 28.6139),
+            "new delhi": (77.2090, 28.6139),
+            "noida": (77.3649, 28.6256),
+            "gurugram": (77.0878, 28.4950),
+            "gurgaon": (77.0878, 28.4950),
+            "kochi": (76.2673, 9.9312),
+            "kolkata": (88.3639, 22.5726),
+            "ahmedabad": (72.5714, 23.0225),
+            "surat": (72.8311, 21.1702),
+            "jaipur": (75.7873, 26.9124),
+            "chandigarh": (76.7794, 30.7333),
+            "lucknow": (80.9462, 26.8467),
+            "madurai": (78.1198, 9.9252),
+            "trichy": (78.7047, 10.7905),
+            "salem": (78.1460, 11.6643),
+            "tirupur": (77.3411, 11.1085),
+            "dubai": (55.2708, 25.2048),
+            "singapore": (103.8198, 1.3521),
+            "london": (-0.1278, 51.5074),
+        }
+        clean = city.strip().lower()
+        return city_lookup.get(clean, (80.2155, 13.0878))
+
+    @staticmethod
     def _extract_coordinates_from_url(url: str) -> Optional[Tuple[float, float]]:
         """Extracts latitude and longitude from various Google Maps URL formats."""
         # 1. Protobuf format: !3d<lat>!4d<lng>

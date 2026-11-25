@@ -87,6 +87,7 @@ import {
   fetchMembersFromServer,
   updateMemberOnServer,
   fetchLicenseFromServer,
+  fetchChaptersFromServer,
   verifyCurrentSessionOnServer,
   updateAdminUserOnServer,
 } from '../../services/proximaApi'
@@ -417,6 +418,17 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
     window.addEventListener('proxima:auth-expired', onAuthExpired)
     return () => window.removeEventListener('proxima:auth-expired', onAuthExpired)
   }, [])
+
+  // Sync registered chapters from PostgreSQL server
+  useEffect(() => {
+    if (isOpen) {
+      fetchChaptersFromServer().then((serverChapters) => {
+        if (serverChapters && serverChapters.length > 0) {
+          setAllChaptersList(serverChapters)
+        }
+      })
+    }
+  }, [isOpen])
 
   // Sync license and members state when chapter changes
   useEffect(() => {

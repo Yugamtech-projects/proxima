@@ -4,7 +4,7 @@ Accepts both camelCase and snake_case while maintaining pure snake_case backend 
 Provides clean type definitions for dropdown selections in OpenAPI docs.
 """
 
-from typing import Literal, Optional
+from typing import List, Literal, Optional
 from schemas.base import SnakeBaseModel
 from schemas.license import LicensePlan
 
@@ -35,6 +35,7 @@ class ChapterOnboardRequest(SnakeBaseModel):
     razorpay_payment_id: Optional[str] = None
     razorpay_signature: Optional[str] = None
     vip_token: Optional[str] = None
+    center_coordinates: Optional[List[float]] = None
 
 
 class ChapterUpdateRequest(SnakeBaseModel):
