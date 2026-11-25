@@ -4,7 +4,7 @@ Exposes /api/auth/login and /api/auth/me endpoints.
 """
 
 from typing import Any, Dict
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Response
 
 from auth.dependencies import get_current_user
 from config.config import RATE_LIMIT_AUTH
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/auth")
 
 @router.post("/login")
 @rate_limiter.limit(RATE_LIMIT_AUTH)
-async def login(payload: LoginRequest, request: Request) -> Dict[str, Any]:
+async def login(payload: LoginRequest, request: Request, response: Response) -> Dict[str, Any]:
     """Authenticates credentials against stored password hashes with brute-force lockout defense."""
     client_ip = request.client.host if request.client else "127.0.0.1"
     user_agent = request.headers.get("user-agent")
