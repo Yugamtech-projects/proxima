@@ -172,9 +172,15 @@ export async function loginWithServer(loginId: string, passwordPlain: string): P
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(convertCase({ loginId, password: passwordPlain }, 'snake')),
-      signal: AbortSignal.timeout(4000),
+      signal: AbortSignal.timeout(10000),
     })
-    const data = await res.json()
+    let data: any = {}
+    try {
+      data = await res.json()
+    } catch {
+      data = { detail: `Backend returned HTTP ${res.status}. Please check server logs.` }
+    }
+
     if (res.ok) {
       return convertCase<ServerAuthResponse>(data, 'camel')
     }
