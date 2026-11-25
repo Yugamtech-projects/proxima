@@ -24,10 +24,10 @@ cd "${ROOT_DIR}/server"
 # 3. Start FastAPI with nodemon auto-reloader (using -y to prevent prompts)
 if command -v nodemon &> /dev/null; then
   echo "📡 Starting FastAPI with global nodemon on port ${PORT}..."
-  exec nodemon --watch . -e py --exec "poetry run uvicorn app:app --host 0.0.0.0 --port ${PORT}"
+  exec nodemon --watch . -e py --ignore "__pycache__/*" --exec "poetry run uvicorn app:app --host 0.0.0.0 --port ${PORT}"
 elif command -v npx &> /dev/null; then
   echo "📡 Starting FastAPI with npx -y nodemon on port ${PORT}..."
-  exec npx -y nodemon --watch . -e py --exec "poetry run uvicorn app:app --host 0.0.0.0 --port ${PORT}"
+  exec npx -y nodemon --watch . -e py --ignore "__pycache__/*" --exec "poetry run uvicorn app:app --host 0.0.0.0 --port ${PORT}"
 else
   echo "⚠️ nodemon/npx not found. Starting native uvicorn with live reload..."
   exec poetry run uvicorn app:app --host 0.0.0.0 --port ${PORT} --reload

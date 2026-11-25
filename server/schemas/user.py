@@ -3,7 +3,7 @@ User and Authentication Schemas for Proxima.
 Accepts both camelCase and snake_case while maintaining pure snake_case backend fields.
 """
 
-from typing import Any, Dict, Optional
+from typing import Optional
 from schemas.base import SnakeBaseModel
 
 
@@ -14,45 +14,23 @@ class LoginRequest(SnakeBaseModel):
     password: str
 
 
-class ChapterSessionInfo(SnakeBaseModel):
-    """Chapter details attached to an active Chapter Admin session."""
+class UserCreateRequest(SnakeBaseModel):
+    """Payload for creating a new administrative user."""
 
-    id: str
-    slug: str
-    name: str
-    organization_type: Optional[str] = "Business Forum"
-    city: str
-    access_key: str
-    status: str = "ACTIVE"
-
-
-class SessionData(SnakeBaseModel):
-    """Session object returned inside ServerAuthResponse."""
-
-    token: str
-    role: str
     email: str
     name: str
-    chapter: Optional[Dict[str, Any]] = None
-    expires_at: int
-
-
-class ServerAuthResponse(SnakeBaseModel):
-    """Standard authentication response consumed by the frontend."""
-
-    success: bool
-    session: Optional[SessionData] = None
-    error: Optional[str] = None
-
-
-class UserResponse(SnakeBaseModel):
-    """User profile representation for administrative listings."""
-
-    id: str
+    password: str
+    role: str = "CHAPTER_ADMIN"
     chapter_id: Optional[str] = None
     chapter_slug: Optional[str] = None
     chapter_name: Optional[str] = None
-    email: str
-    name: str
-    role: str
-    is_active: bool = True
+
+
+class UserUpdateRequest(SnakeBaseModel):
+    """Payload for partial updates to an administrative user."""
+
+    email: Optional[str] = None
+    name: Optional[str] = None
+    password: Optional[str] = None
+    role: Optional[str] = None
+    is_active: Optional[bool] = None

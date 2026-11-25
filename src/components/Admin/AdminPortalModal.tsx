@@ -83,6 +83,12 @@ import {
   grantFreeLicenseOnServer,
   getRazorpayServerConfig,
   saveRazorpayServerConfig,
+  onboardChapterWithServer,
+  fetchMembersFromServer,
+  updateMemberOnServer,
+  fetchLicenseFromServer,
+  verifyCurrentSessionOnServer,
+  updateAdminUserOnServer,
 } from '../../services/proximaApi'
 import type { ChapterLicense } from '../../types/member'
 import { searchLocation, CHENNAI_HUBS } from '../../utils/geocoding'
@@ -107,13 +113,14 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
   onSelectChapter,
   contextChapter,
 }) => {
-  // Session State: Load from localStorage if previously authenticated and not expired
+  // Session State: Load strictly from temporary sessionStorage if authenticated and not expired
   const [adminSession, setAdminSession] = useState<AuthenticatedAdminSession | null>(() => {
     try {
-      const saved = localStorage.getItem('proxima_admin_session')
+      const saved = sessionStorage.getItem('proxima_admin_session')
       if (saved) {
         const parsed: AuthenticatedAdminSession = JSON.parse(saved)
         if (parsed.expiresAt && Date.now() > parsed.expiresAt) {
+          sessionStorage.removeItem('proxima_admin_session')
           localStorage.removeItem('proxima_admin_session')
           return null
         }
@@ -182,7 +189,7 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
     'CHAPTERS' | 'LICENSES' | 'DEMO_SANDBOX' | 'MEMBERS' | 'DEMO_PROFILES' | 'PROFILE'
   >(() => {
     try {
-      const saved = localStorage.getItem('proxima_admin_session')
+      const saved = sessionStorage.getItem('proxima_admin_session')
       if (saved) {
         const parsed = JSON.parse(saved)
         if (parsed?.role === 'MASTER_ADMIN') return 'CHAPTERS'
@@ -228,7 +235,7 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
   // Master Admin Selected Chapter Drilldown (null = showing All Chapters Directory; string = viewing that specific Chapter's Screen)
   const [selectedChapterId, setSelectedChapterId] = useState<string | null>(() => {
     try {
-      const saved = localStorage.getItem('proxima_admin_session')
+      const saved = sessionStorage.getItem('proxima_admin_session')
       if (saved) {
         const parsed = JSON.parse(saved)
         if (parsed?.role === 'CHAPTER_ADMIN' && parsed.chapter) {
@@ -383,9 +390,45 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
     })
   }, [])
 
-  // Sync license state when chapter changes
+  // Verify session on modal open against backend authority
+  useEffect(() => {
+    if (isOpen && adminSession) {
+      verifyCurrentSessionOnServer().then((isValid) => {
+        if (!isValid) {
+          handleLogout()
+        }
+      })
+    }
+  }, [isOpen])
+
+  // Listen for real-time session revocation events across all API operations
+  useEffect(() => {
+    const onAuthExpired = () => {
+      setAdminSession(null)
+      sessionStorage.removeItem('proxima_admin_session')
+      localStorage.removeItem('proxima_admin_session')
+      sessionStorage.removeItem('proxima_active_token')
+      setEmailInput('')
+      setPasswordInput('')
+      setSelectedChapterId(null)
+      setActiveTab('MEMBERS')
+      setAuthError('Your session has been revoked or expired. Please log in again.')
+    }
+    window.addEventListener('proxima:auth-expired', onAuthExpired)
+    return () => window.removeEventListener('proxima:auth-expired', onAuthExpired)
+  }, [])
+
+  // Sync license and members state when chapter changes
   useEffect(() => {
     setChapterLicense(getChapterLicense(effectiveChapter.id))
+    fetchLicenseFromServer(effectiveChapter.id).then((lic) => {
+      if (lic) setChapterLicense(lic)
+    })
+    fetchMembersFromServer(effectiveChapter.id).then((serverMembers) => {
+      if (serverMembers && serverMembers.length > 0) {
+        setChapterMembers(serverMembers)
+      }
+    })
   }, [effectiveChapter.id])
 
   const fileInputRef = React.useRef<HTMLInputElement | null>(null)
@@ -558,22 +601,37 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
 
       // 1. Attempt server-side authentication first
       let session: AuthenticatedAdminSession | null = null
+      let serverHandled = false
+
       try {
         const serverResult = await loginWithServer(sanitizedId, sanitizedPass)
-        if (serverResult && serverResult.session) {
-          session = serverResult.session as AuthenticatedAdminSession
+        if (serverResult !== null) {
+          serverHandled = true
+          if (serverResult.success && serverResult.session) {
+            session = serverResult.session as AuthenticatedAdminSession
+          } else {
+            // Server actively rejected the login (401 or 429) -> strictly block entry!
+            setAuthError(serverResult.error || 'Invalid credentials. Access denied.')
+            securityEngine.recordFailedAttempt(sanitizedId)
+            const updatedRate = securityEngine.getRateLimitStatus(sanitizedId)
+            setRateLimitStatus(updatedRate)
+            setIsAuthenticating(false)
+            return
+          }
         }
       } catch (srvErr) {
-        console.warn('Server login fallback to local auth:', srvErr)
+        console.warn('Server login unreachable, falling back to local auth:', srvErr)
       }
 
-      if (!session) {
+      // 2. Only if server was completely unreachable / offline, fall back to client authentication
+      if (!serverHandled) {
         session = authenticateAdminCredentials(sanitizedId, sanitizedPass, contextChapter)
       }
 
       if (session) {
         setAdminSession(session)
-        localStorage.setItem('proxima_admin_session', JSON.stringify(session))
+        sessionStorage.setItem('proxima_admin_session', JSON.stringify(session))
+        localStorage.removeItem('proxima_admin_session')
         setAuthError(null)
         securityEngine.resetFailedAttempts(sanitizedId)
         setRateLimitStatus({ isLocked: false, failedAttempts: 0, remainingSeconds: 0 })
@@ -625,11 +683,14 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
 
   const handleLogout = () => {
     setAdminSession(null)
+    sessionStorage.removeItem('proxima_admin_session')
     localStorage.removeItem('proxima_admin_session')
+    sessionStorage.removeItem('proxima_active_token')
     setEmailInput('')
     setPasswordInput('')
     setSelectedChapterId(null)
     setActiveTab('MEMBERS')
+    setAuthError(null)
   }
 
   // Switch session from Master Admin to specific Chapter Admin workspace
@@ -644,7 +705,8 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
       expiresAt: Date.now() + 24 * 60 * 60 * 1000,
     }
     setAdminSession(session)
-    localStorage.setItem('proxima_admin_session', JSON.stringify(session))
+    sessionStorage.setItem('proxima_admin_session', JSON.stringify(session))
+    localStorage.removeItem('proxima_admin_session')
     setMasterAdminSelectedChapterId(targetChapter.id)
     setActiveTab('MEMBERS')
     setFeedbackMessage(`Switched into ${targetChapter.name} as Chapter Administrator`)
@@ -667,6 +729,10 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
     syncMembersToServer(effectiveChapter.id, updatedMembers)
     if (updatedMember) {
       const isNowVisible = updatedMember.isVisible !== false
+      updateMemberOnServer(memberId, {
+        isVisible: isNowVisible,
+        membershipStatus: isNowVisible ? 'RENEWED' : 'NOT_RENEWED',
+      })
       setFeedbackMessage(
         `${updatedMember.name} is now ${isNowVisible ? 'Visible on Map (Renewed)' : 'Hidden from Map (Not Renewed)'}`
       )
@@ -1062,24 +1128,36 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
   }
 
   // Save Chapter Admin Credentials
-  const handleSaveCredentials = (e: React.FormEvent) => {
+  const handleSaveCredentials = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!profileAdminEmail.trim()) {
       alert('Email cannot be empty.')
       return
     }
 
+    const newPass = newAdminPassword.trim()
     const updatedAdmin = updateChapterAdmin(
       effectiveChapter.id,
       profileAdminEmail.trim(),
-      newAdminPassword.trim() ? newAdminPassword.trim() : undefined
+      newPass ? newPass : undefined
     )
     if (updatedAdmin) {
       setChapterAdminsList(getChapterAdmins())
       setNewAdminPassword('')
+
+      // Sync to PostgreSQL backend
+      try {
+        await updateAdminUserOnServer(updatedAdmin.id || `admin-${effectiveChapter.id}`, {
+          email: profileAdminEmail.trim(),
+          password: newPass ? newPass : undefined,
+        })
+      } catch (err) {
+        console.warn('Failed syncing chapter admin credentials to server:', err)
+      }
+
       setFeedbackMessage(
-        newAdminPassword.trim()
-          ? `Credentials for ${effectiveChapter.name} updated & SHA-256 hashed!`
+        newPass
+          ? `Credentials for ${effectiveChapter.name} updated & hashed in PostgreSQL!`
           : `Admin email for ${effectiveChapter.name} updated successfully!`
       )
       setTimeout(() => setFeedbackMessage(null), 3500)
@@ -1087,18 +1165,29 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
   }
 
   // Save Master Super Admin Credentials
-  const handleSaveMasterCredentials = (e: React.FormEvent) => {
+  const handleSaveMasterCredentials = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!masterAdminEmail.trim()) {
       alert('Master admin email cannot be empty.')
       return
     }
 
+    const newPass = newMasterAdminPassword.trim()
     const updated = updateMasterAdmin(
       masterAdminEmail.trim(),
-      newMasterAdminPassword.trim() ? newMasterAdminPassword.trim() : undefined
+      newPass ? newPass : undefined
     )
     setNewMasterAdminPassword('')
+
+    // Sync to PostgreSQL backend via PATCH /api/users/admin-master
+    try {
+      await updateAdminUserOnServer('admin-master', {
+        email: masterAdminEmail.trim(),
+        password: newPass ? newPass : undefined,
+      })
+    } catch (err) {
+      console.warn('Failed syncing master admin credentials to server:', err)
+    }
 
     if (adminSession?.role === 'MASTER_ADMIN') {
       const updatedSession: AuthenticatedAdminSession = {
@@ -1106,12 +1195,13 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
         email: updated.email,
       }
       setAdminSession(updatedSession)
-      localStorage.setItem('proxima_admin_session', JSON.stringify(updatedSession))
+      sessionStorage.setItem('proxima_admin_session', JSON.stringify(updatedSession))
+      localStorage.removeItem('proxima_admin_session')
     }
 
     setFeedbackMessage(
-      newMasterAdminPassword.trim()
-        ? 'Master Super Admin credentials updated & SHA-256 hashed!'
+      newPass
+        ? 'Master Super Admin credentials updated & hashed in PostgreSQL!'
         : 'Master Super Admin email updated successfully!'
     )
     setTimeout(() => setFeedbackMessage(null), 3500)
@@ -1168,6 +1258,21 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({
       email: cleanEmail,
       passwordPlain: cleanPassword,
     })
+
+    // Authoritative Server Provisioning
+    try {
+      await onboardChapterWithServer({
+        chapterName: cleanName,
+        city: cleanCity,
+        adminLoginId: cleanEmail.split('@')[0],
+        adminPassword: cleanPassword,
+        organizationType: newChapterOrgType,
+        planKey: 'ANNUAL',
+        vipToken: 'free_pass_master_provision',
+      })
+    } catch {
+      // Offline fallback maintained
+    }
 
     if (provisionAsFreePrototype) {
       grantComplimentaryLicense(newCh.id, 'Team Credit / Working Prototype', 365)

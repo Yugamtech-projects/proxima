@@ -13,6 +13,7 @@ import {
 import type { Member, DistanceRadius, Chapter } from '../../types/member'
 import { formatDistance } from '../../utils/distance'
 import { openExternalNavigation } from '../../utils/navigation'
+import { fetchNearbyRadarMembers } from '../../services/proximaApi'
 
 interface NearMeRadarModalProps {
   isOpen: boolean
@@ -49,10 +50,38 @@ export const NearMeRadarModal: React.FC<NearMeRadarModalProps> = ({
   onOpenDirectory,
   activeChapter,
 }) => {
+  const [serverRadarMembers, setServerRadarMembers] = React.useState<(Member & { distanceKm?: number })[] | null>(null)
+
+  React.useEffect(() => {
+    if (!isOpen || !userLocation) {
+      setServerRadarMembers(null)
+      return
+    }
+
+    const radius = selectedRadius === 'ALL' ? 50 : selectedRadius
+    fetchNearbyRadarMembers({
+      latitude: userLocation.latitude,
+      longitude: userLocation.longitude,
+      radiusKm: radius,
+      chapterId: activeChapter?.id,
+    })
+      .then((res) => {
+        if (res && res.members && res.members.length > 0) {
+          setServerRadarMembers(res.members)
+        } else {
+          setServerRadarMembers(null)
+        }
+      })
+      .catch(() => setServerRadarMembers(null))
+  }, [isOpen, userLocation?.latitude, userLocation?.longitude, selectedRadius, activeChapter?.id])
+
   if (!isOpen) return null
 
+  // Use server-side PostGIS results if available, otherwise fallback to client members
+  const effectiveList = serverRadarMembers || members
+
   // Ensure members are strictly sorted from closest to farthest
-  const sortedMembers = [...members].sort((a, b) => {
+  const sortedMembers = [...effectiveList].sort((a, b) => {
     const distA = a.distanceKm ?? Infinity
     const distB = b.distanceKm ?? Infinity
     return distA - distB

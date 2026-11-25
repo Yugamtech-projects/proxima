@@ -1,7 +1,6 @@
 """
 Licenses Database Model & DDL Definition.
-Corresponds to db.licenses[chapterId] in proxima_db.json.
-Features dedicated id VARCHAR(36) PRIMARY KEY unique identifier and chapter_id foreign key.
+Corresponds to chapter licenses in PostgreSQL.
 """
 
 from config.config import LICENSES_TABLE, CHAPTERS_TABLE
@@ -11,7 +10,7 @@ def get_licenses_table_sql() -> str:
     """Generates the DDL statement for the licenses table."""
     return f"""
 CREATE TABLE IF NOT EXISTS {LICENSES_TABLE} (
-    id VARCHAR(36) PRIMARY KEY,
+    id VARCHAR(64) PRIMARY KEY,
     chapter_id VARCHAR(36) NOT NULL UNIQUE REFERENCES {CHAPTERS_TABLE}(id) ON DELETE CASCADE,
     status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
     plan VARCHAR(100) NOT NULL,

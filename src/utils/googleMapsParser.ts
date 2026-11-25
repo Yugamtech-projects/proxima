@@ -1,4 +1,5 @@
 import { searchLocation } from './geocoding'
+import { expandGoogleMapsUrlOnServer } from '../services/proximaApi'
 
 export interface ParsedLocationResult {
   latitude: number
@@ -125,21 +126,25 @@ export async function parseGoogleMapsLocation(input: string): Promise<ParsedLoca
     }
   }
 
-  // 6. If it's a short URL (maps.app.goo.gl or goo.gl/maps), try to resolve or follow redirect
+  // 6. If it's a short URL (maps.app.goo.gl or goo.gl/maps), resolve via backend redirect expander
   if (trimmed.includes('maps.app.goo.gl/') || trimmed.includes('goo.gl/maps/')) {
     try {
-      const response = await fetch(trimmed, { method: 'GET', redirect: 'follow' })
-      if (response.url && response.url !== trimmed) {
-        const resolved = await parseGoogleMapsLocation(response.url)
-        if (resolved) {
-          return {
-            ...resolved,
-            sourceDescription: `Resolved from Google Maps Shortlink (${resolved.sourceDescription})`,
-          }
+      const serverRes = await expandGoogleMapsUrlOnServer(trimmed)
+      if (serverRes && serverRes.success && serverRes.latitude && serverRes.longitude) {
+        const placeName = serverRes.extractedName || extractPlaceNameFromUrl(serverRes.resolvedUrl || trimmed)
+        const components = parseAddressComponents(placeName)
+        return {
+          latitude: serverRes.latitude,
+          longitude: serverRes.longitude,
+          extractedName: placeName,
+          suggestedArea: components.area,
+          suggestedCity: components.city,
+          confidence: 'HIGH_COORDINATES',
+          sourceDescription: 'Resolved via Backend Google Maps Redirect Expander',
         }
       }
-    } catch {
-      // Browser CORS may prevent following external shortlinks directly in JS
+    } catch (err) {
+      console.warn('Backend shortlink expander fallback:', err)
     }
   }
 

@@ -1,7 +1,7 @@
 // Test Self-Serve Chapter Onboarding Flow
 async function testOnboarding() {
   console.log('Testing Self-Serve Onboarding...')
-  const res = await fetch('http://localhost:5051/api/chapters/onboard', {
+  const res = await fetch('http://localhost:5051/api/chapters', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

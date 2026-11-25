@@ -7,8 +7,9 @@ from config.config import MEMBERS_TABLE, CHAPTERS_TABLE
 
 
 def get_members_table_sql() -> str:
-    """Generates the DDL statement for the members table."""
+    """Generates the DDL statement for the members table with native PostGIS spatial support."""
     return f"""
+CREATE EXTENSION IF NOT EXISTS postgis;
 CREATE TABLE IF NOT EXISTS {MEMBERS_TABLE} (
     id VARCHAR(36) PRIMARY KEY,
     chapter_id VARCHAR(36) NOT NULL REFERENCES {CHAPTERS_TABLE}(id) ON DELETE CASCADE,
@@ -29,9 +30,12 @@ CREATE TABLE IF NOT EXISTS {MEMBERS_TABLE} (
     tags JSONB NOT NULL DEFAULT '[]'::jsonb,
     membership_status VARCHAR(20) NOT NULL DEFAULT 'RENEWED',
     is_visible BOOLEAN NOT NULL DEFAULT TRUE,
+    geom GEOMETRY(Point, 4326) NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_members_chapter_visibility ON {MEMBERS_TABLE}(chapter_id, is_visible);
 CREATE INDEX IF NOT EXISTS idx_members_category_id ON {MEMBERS_TABLE}(category_id);
+ALTER TABLE {MEMBERS_TABLE} ADD COLUMN IF NOT EXISTS geom GEOMETRY(Point, 4326);
+CREATE INDEX IF NOT EXISTS idx_members_geom ON {MEMBERS_TABLE} USING GIST (geom);
 """

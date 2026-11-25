@@ -404,3 +404,32 @@ All SQL queries executed across the Python backend must strictly adhere to these
      )
      ```
 
+### 6.5 Centralized Plan Literals, Enums & Schema Selection Standard
+1. **No Magic Strings for Plans or Statuses:**
+   - Never write loose string literals for plan names (e.g. `"Complimentary Prototype Pass (₹0 / 1 Year Free)"`, `"Annual Chapter License (₹1,999 / 1 Year)"`) or plan keys in business logic.
+   - Always import and use the centralized Enums and string constants from `config.config`:
+     ```python
+     from config.config import (
+         LicensePlanKey,
+         LicensePlanName,
+         LicenseStatus,
+         PLAN_ANNUAL,
+         PLAN_SEMI_ANNUAL,
+         PLAN_COMPLIMENTARY,
+         RENEWAL_PLANS,
+     )
+     ```
+2. **Pydantic Literal Types for Clean Schema Selection:**
+   - In request/response schemas, define plan and status fields using `Literal[...]` types (e.g. `LicensePlanLiteral`, `LicenseKeyLiteral`, `LicenseStatusLiteral`).
+   - This automatically enables Swagger/OpenAPI documentation (`/docs`) to present clean dropdown menus for selecting plans and statuses.
+
+---
+
+## 7. Strict Git Mandate - DO NOT TOUCH GIT AT ALL
+
+- **The assistant must NEVER execute ANY git commands** (`git add`, `git restore`, `git reset`, `git commit`, `git push`, etc.).
+- **No Staging or Unstaging:** Never stage (`git add`) or unstage (`git restore --staged`) files at any time.
+- **Sole User Ownership:** Staging, unstaging, committing, and pushing are exclusively performed by the user in their own terminal or editor.
+- **Assistant Scope:** The assistant's role is strictly limited to making code changes in the workspace files. Do NOT touch git under any circumstances.
+
+

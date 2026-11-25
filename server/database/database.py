@@ -8,6 +8,7 @@ import ssl
 import time
 import asyncio
 import socket
+from pathlib import Path
 from typing import Any, Dict, Optional
 
 from fastapi import HTTPException
@@ -52,16 +53,24 @@ class DatabaseManager:
             try:
                 url = make_url(connection_string).set(drivername="postgresql+asyncpg")
 
-                ssl_ctx = ssl.create_default_context()
-                ssl_ctx.check_hostname = False
-                ssl_ctx.verify_mode = ssl.CERT_NONE
+                ca_path = Path(__file__).resolve().parent / "supabase-ca.pem"
+                if ca_path.exists():
+                    ssl_ctx = ssl.create_default_context(cafile=str(ca_path))
+                    ssl_ctx.verify_mode = ssl.CERT_REQUIRED
+                    ssl_ctx.check_hostname = False
+                    logger.info("Configured database connection with verified CA bundle (%s)", ca_path.name)
+                else:
+                    ssl_ctx = ssl.create_default_context()
+                    ssl_ctx.check_hostname = False
+                    ssl_ctx.verify_mode = ssl.CERT_NONE
 
                 cls._engine = create_async_engine(
                     url,
                     pool_size=10,
                     max_overflow=20,
                     pool_timeout=30,
-                    pool_recycle=1800,
+                    pool_recycle=300,
+                    pool_pre_ping=True,
                     echo=False,
                     connect_args={
                         "ssl": ssl_ctx,

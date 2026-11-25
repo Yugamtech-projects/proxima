@@ -38,7 +38,19 @@ async def get_current_user(authorization: Optional[str] = Header(default=None, a
     if not users:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User account not found.", headers={"WWW-Authenticate": "Bearer"})
 
-    return users[0]
+    user = users[0]
+
+    # Verify user account is active
+    if not user.get("is_active", True):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User account is deactivated or suspended.", headers={"WWW-Authenticate": "Bearer"})
+
+    # Verify JWT token version matches the database token_version (instant revocation check)
+    token_version = payload.get("ver")
+    expected_version = user.get("token_version", 1)
+    if token_version is not None and int(token_version) != int(expected_version):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session token has been revoked. Please log in again.", headers={"WWW-Authenticate": "Bearer"})
+
+    return user
 
 
 async def require_master_admin(current_user: Dict[str, Any] = Depends(get_current_user)) -> Dict[str, Any]:

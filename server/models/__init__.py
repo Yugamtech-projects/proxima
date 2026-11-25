@@ -9,11 +9,15 @@ from config.config import (
     USERS_TABLE,
     MEMBERS_TABLE,
     LICENSES_TABLE,
+    VIP_PASSES_TABLE,
+    AUTH_ATTEMPT_LOGS_TABLE,
 )
 from .chapter import get_chapters_table_sql
 from .user import get_users_table_sql
 from .member import get_members_table_sql
 from .license import get_licenses_table_sql
+from .vip_pass import get_vip_passes_table_sql
+from .auth_attempt import get_auth_attempts_table_sql
 
 
 def get_all_tables_sql() -> List[str]:
@@ -23,6 +27,8 @@ def get_all_tables_sql() -> List[str]:
         get_users_table_sql(),
         get_members_table_sql(),
         get_licenses_table_sql(),
+        get_vip_passes_table_sql(),
+        get_auth_attempts_table_sql(),
     ]
 
 
@@ -33,10 +39,14 @@ __all__ = [
     "USERS_TABLE",
     "MEMBERS_TABLE",
     "LICENSES_TABLE",
+    "VIP_PASSES_TABLE",
+    "AUTH_ATTEMPT_LOGS_TABLE",
     "ALL_TABLES_SQL",
     "get_all_tables_sql",
     "get_chapters_table_sql",
     "get_users_table_sql",
     "get_members_table_sql",
     "get_licenses_table_sql",
+    "get_vip_passes_table_sql",
+    "get_auth_attempts_table_sql",
 ]

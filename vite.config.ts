@@ -5,6 +5,7 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   base: './',
+  envPrefix: ['VITE_', 'RAZORPAY_', 'API_'],
   plugins: [react(), tailwindcss()],
   optimizeDeps: {
     exclude: ['maplibre-gl'],
@@ -36,5 +37,3 @@ export default defineConfig({
     },
   },
 })
-
-

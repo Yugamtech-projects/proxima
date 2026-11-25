@@ -8,21 +8,28 @@ Provides:
 """
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
+from config.config import CORS_ORIGINS
 from database.database import DatabaseManager
+from utils.crypto import generate_secure_token
+from utils.rate_limiter import rate_limiter
 from utils.logger import logger
 from api import (
     health_router,
     auth_router,
-    chapters_router,
-    members_router,
-    licensing_router,
+    chapter_router,
+    member_router,
+    license_router,
+    vip_pass_router,
     payment_router,
-    users_router,
+    user_router,
     admin_router,
+    spatial_router,
 )
 
 
@@ -45,17 +52,40 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# 1. CORS Configuration (Allows seamless Vite HMR and production domain requests)
+app.state.limiter = rate_limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
+# 1. Global Sanitized Exception Handler (Prevents internal SQL trace & table leakage)
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    """Centralized unhandled exception handler that prevents internal SQL/stack trace leakage."""
+    if isinstance(exc, HTTPException):
+        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+    ref_id = f"err_{generate_secure_token(nbytes=6)}"
+    logger.error(
+        "Unhandled server error intercepted | ref_id=%s, path=%s, method=%s, exc=%s",
+        ref_id, request.url.path, request.method, str(exc), exc_info=True,
+    )
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": f"Internal server error. Reference ID: {ref_id}"},
+    )
+
+
+# 2. CORS Configuration (Allows authorized development and production origins)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=CORS_ORIGINS,
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1|.*\.proxima\.network)(:\d+)?$",
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
 
-# 2. Hardened Security Headers Middleware (Matching server.mjs enterprise headers)
+# 3. Hardened Security Headers Middleware (Matching server.mjs enterprise headers)
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
@@ -67,19 +97,13 @@ async def add_security_headers(request: Request, call_next):
 
 
 # 3. Mount Domain API Routers under /api with explicit OpenAPI tags
-app.include_router(health_router, prefix="/api", tags=["Health"])
-app.include_router(health_router, prefix="", tags=["Health"])  # Direct /healthz support
+app.include_router(health_router, prefix="", tags=["Health"])  # Direct /health and /healthz support
 app.include_router(auth_router, prefix="/api", tags=["Authentication"])
-app.include_router(chapters_router, prefix="/api", tags=["Chapters"])
-app.include_router(members_router, prefix="/api", tags=["Members"])
-app.include_router(licensing_router, prefix="/api", tags=["Licensing"])
+app.include_router(chapter_router, prefix="/api", tags=["Chapter"])
+app.include_router(member_router, prefix="/api", tags=["Member"])
+app.include_router(license_router, prefix="/api", tags=["License"])
+app.include_router(vip_pass_router, prefix="/api", tags=["VIP Pass"])
 app.include_router(payment_router, prefix="/api", tags=["Payment"])
-app.include_router(users_router, prefix="/api", tags=["Users"])
+app.include_router(user_router, prefix="/api", tags=["User"])
 app.include_router(admin_router, prefix="/api", tags=["Admin Analytics"])
-
-
-# 4. Global Exception Handler
-@app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    logger.error("Unhandled server exception on %s: %s", request.url.path, str(exc))
-    return JSONResponse(status_code=500, content={"error": str(exc) or "Internal Server Error"})
+app.include_router(spatial_router, prefix="/api", tags=["Spatial & Geospatial"])

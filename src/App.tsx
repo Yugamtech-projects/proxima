@@ -52,6 +52,10 @@ import {
 import { ViewerIdentityModal } from './components/Viewer/ViewerIdentityModal'
 import { TripMultiplierModal } from './components/Navigation/TripMultiplierModal'
 import { openExternalNavigation } from './utils/navigation'
+import {
+  fetchMembersFromServer,
+  fetchChapterByTokenFromServer,
+} from './services/proximaApi'
 
 export function App() {
   // Parse URL query parameter: ?c=token (high-entropy unpredictable cryptographic access key)
@@ -85,6 +89,20 @@ export function App() {
   const [invalidTokenAttempt, setInvalidTokenAttempt] = useState<string | null>(
     initialUrlInfo.isInvalid ? initialUrlInfo.attemptedToken : null
   )
+
+  // Synchronize chapter and token from server if quarantined or URL token changed
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const token = params.get('c') || params.get('chapter') || params.get('key') || params.get('token')
+    if (token && (!activeChapter || activeChapter.accessKey !== token)) {
+      fetchChapterByTokenFromServer(token).then((ch) => {
+        if (ch) {
+          setActiveChapter(ch)
+          setInvalidTokenAttempt(null)
+        }
+      })
+    }
+  }, [activeChapter?.accessKey])
 
   // Animated flight trigger from full country of India to city
   const [triggerFlightAnimation, setTriggerFlightAnimation] = useState(() => {
@@ -187,7 +205,24 @@ export function App() {
           )
         )
       } else {
-        setMembersList(getChapterMembers(activeChapter.id))
+        const isDemoChapter =
+          activeChapter.id === 'chap-titans' ||
+          activeChapter.id === 'chap-blr-central' ||
+          activeChapter.id === 'chap-mumbai-apex' ||
+          activeChapter.organizationType === 'Executive Demo' ||
+          (activeChapter.slug && activeChapter.slug.includes('demo'))
+
+        if (isDemoChapter) {
+          setMembersList(getChapterMembers(activeChapter.id))
+        } else {
+          setMembersList([])
+        }
+
+        fetchMembersFromServer(activeChapter.id).then((serverMembers) => {
+          if (Array.isArray(serverMembers)) {
+            setMembersList(serverMembers)
+          }
+        })
       }
 
       // Check URL or local storage for viewer identity on active chapter

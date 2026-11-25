@@ -12,7 +12,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 from sqlalchemy import text
 
-from config.config import DATABASE_SCHEMA, CHAPTERS_TABLE, USERS_TABLE, LICENSES_TABLE, MEMBERS_TABLE
+from config.config import (
+    DATABASE_SCHEMA,
+    CHAPTERS_TABLE,
+    USERS_TABLE,
+    LICENSES_TABLE,
+    MEMBERS_TABLE,
+)
+from schemas.license import LICENSE_PLAN_TITLES
 from database.database import DatabaseManager
 from utils.logger import logger
 
@@ -142,7 +149,7 @@ async def migrate_data():
                     "id": f"lic-{chap_id}",
                     "chapter_id": chap_id,
                     "status": lic.get("status", "ACTIVE"),
-                    "plan": lic.get("plan", "Annual Chapter License (₹1,999 / 1 Year)"),
+                    "plan": lic.get("plan", LICENSE_PLAN_TITLES["ANNUAL"]),
                     "price_inr": float(lic.get("priceInr", 1999)),
                     "valid_until": valid_dt,
                     "last_payment_date": last_pay_dt,

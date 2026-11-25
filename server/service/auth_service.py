@@ -12,7 +12,7 @@ from config.config import USERS_TABLE, CHAPTERS_TABLE
 from database.database import DatabaseManager
 from auth.password import verify_password
 from auth.jwt import create_access_token
-from utils.rate_limiter import rate_limiter
+from service.audit_service import AuditService
 from utils.logger import logger
 
 
@@ -53,33 +53,32 @@ class AuthService:
 
 
     @classmethod
-    async def authenticate_user(cls, login_id: str, password: str, client_ip: str = "127.0.0.1") -> Dict[str, Any]:
+    async def authenticate_user(cls, login_id: str, password: str, client_ip: str = "127.0.0.1", user_agent: Optional[str] = None) -> Dict[str, Any]:
         """
         Authenticates credentials against stored password hashes.
-        Enforces a 15-minute sliding-window rate limiter on failed attempts.
+        Enforces a 15-minute sliding-window rate limiter on failed attempts in PostgreSQL audit logs.
         """
         clean_id = login_id.strip().lower()
-        rate_key = f"{client_ip}:{clean_id}"
 
-        # 1. Check Server-Side Rate Limit Lockout
-        is_locked, remaining_seconds = rate_limiter.check_rate_limit(key=rate_key)
+        # 1. Check Server-Side Rate Limit Lockout from PostgreSQL Audit Service
+        is_locked, remaining_seconds = await AuditService.check_account_lockout(identifier=clean_id, ip_address=client_ip)
         if is_locked:
             raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=f"Too many failed login attempts. Security lockout active for {remaining_seconds}s.")
 
         # 2. Lookup User
         user = await cls._resolve_user(clean_id=clean_id)
         if not user:
-            rate_limiter.record_failure(key=rate_key)
+            await AuditService.record_login_attempt(identifier=clean_id, ip_address=client_ip, status="FAILED", user_agent=user_agent)
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials. Access denied.")
 
         # 3. Verify Password Hash
         is_valid = verify_password(plain_password=password, hashed_password=user.get("password_hash", ""))
         if not is_valid:
-            rate_limiter.record_failure(key=rate_key)
+            await AuditService.record_login_attempt(identifier=clean_id, ip_address=client_ip, status="FAILED", user_agent=user_agent)
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials. Access denied.")
 
-        # 4. Success: Clear rate limiter
-        rate_limiter.reset_rate_limit(key=rate_key)
+        # 4. Success: Record in audit log
+        await AuditService.record_successful_login(identifier=clean_id, ip_address=client_ip, user_agent=user_agent)
 
         # 5. Fetch associated Chapter details for session payload
         chapter_data: Optional[Dict[str, Any]] = None
@@ -92,33 +91,34 @@ class AuthService:
             select_user_chapter_params = {"chapter_id": user["chapter_id"]}
             chapters = await DatabaseManager.execute_db_select(query=select_user_chapter_query, params=select_user_chapter_params)
             if chapters:
-                c = chapters[0]
+                chapter_record = chapters[0]
                 chapter_data = {
-                    "id": c.get("id"),
-                    "slug": c.get("slug"),
-                    "name": c.get("name"),
-                    "organizationType": c.get("organization_type", "Business Forum"),
-                    "city": c.get("city"),
-                    "accessKey": c.get("access_key"),
-                    "status": c.get("status", "ACTIVE"),
+                    "id": chapter_record.get("id"),
+                    "slug": chapter_record.get("slug"),
+                    "name": chapter_record.get("name"),
+                    "organization_type": chapter_record.get("organization_type", "Business Forum"),
+                    "city": chapter_record.get("city"),
+                    "access_key": chapter_record.get("access_key"),
+                    "status": chapter_record.get("status", "ACTIVE"),
                 }
 
-        # 6. Generate 24-hour stateless JWT token
+        # 6. Generate 24-hour stateless JWT token with token_version for instant revocation
         token_payload = {
             "sub": user["email"],
             "role": user["role"],
             "chapter_id": user.get("chapter_id"),
+            "ver": int(user.get("token_version", 1)),
         }
         token = create_access_token(data=token_payload)
 
-        # 7. Construct session object matching ServerAuthResponse contract
+        # 7. Construct session object in pure snake_case
         session = {
             "token": token,
             "role": user["role"],
             "email": user["email"],
             "name": user.get("name", "Admin"),
             "chapter": chapter_data,
-            "expiresAt": int(time.time() * 1000) + 24 * 3600 * 1000,
+            "expires_at": int(time.time() * 1000) + 24 * 3600 * 1000,
         }
 
         logger.info("Admin login successful | email=%s, role=%s", user["email"], user["role"])

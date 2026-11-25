@@ -1,62 +1,36 @@
 """
-License and VIP Pass Schemas for Proxima.
-Accepts both camelCase and snake_case while maintaining pure snake_case backend fields.
+License Schemas for Proxima.
+Provides clean type definitions and plan key-to-title mappings for dropdown selections in OpenAPI docs.
 """
 
-from typing import List, Optional
+from typing import Dict, Literal, Optional
 from schemas.base import SnakeBaseModel
 
+LicensePlan = Literal["ANNUAL", "SEMI_ANNUAL", "COMPLIMENTARY"]
+LicenseStatus = Literal["ACTIVE", "EXPIRED", "SUSPENDED"]
 
-class InvoiceResponse(SnakeBaseModel):
-    """Receipt invoice payload."""
-
-    id: str
-    date: str
-    amount: float
-    plan: str
-    payment_id: Optional[str] = None
-    order_id: Optional[str] = None
-    status: str = "PAID"
+LICENSE_PLAN_TITLES: Dict[str, str] = {
+    "ANNUAL": "Annual Chapter License (₹1,999 / 1 Year)",
+    "SEMI_ANNUAL": "Semi-Annual Plan (₹1,194 / 6 Months)",
+    "COMPLIMENTARY": "Complimentary Prototype Pass (₹0 / 1 Year Free)",
+}
 
 
-class LicenseResponse(SnakeBaseModel):
-    """Chapter License payload matching proxima_db.json."""
-
-    id: str
-    chapter_id: str
-    status: str = "ACTIVE"
-    plan: str
-    price_inr: float = 0.00
-    valid_until: str
-    last_payment_date: Optional[str] = None
-    last_payment_id: Optional[str] = None
-    last_order_id: Optional[str] = None
-    invoices: List[InvoiceResponse] = []
-
-
-class GrantFreeLicenseRequest(SnakeBaseModel):
-    """Payload for POST /api/chapters/grant-free-license."""
+class LicenseCreateRequest(SnakeBaseModel):
+    """Payload for creating or assigning a chapter license."""
 
     chapter_id: str
-    reason: Optional[str] = "Team Credit / Working Prototype"
+    plan: Optional[LicensePlan | str] = "ANNUAL"
+    price_inr: Optional[float] = 0.0
     duration_days: Optional[int] = 365
+    status: Optional[LicenseStatus] = "ACTIVE"
+    reason: Optional[str] = "Team Credit / Working Prototype"
 
 
-class VipPassCreateRequest(SnakeBaseModel):
-    """Payload for POST /api/licensing/vip-passes."""
+class LicenseUpdateRequest(SnakeBaseModel):
+    """Payload for partial updates to a chapter license."""
 
-    label: Optional[str] = "Team Credit / Working Prototype"
-    max_uses: Optional[int] = 2
-    plan_days: Optional[int] = 365
-
-
-class VipPassResponse(SnakeBaseModel):
-    """VIP Pass record payload."""
-
-    id: str
-    token: str
-    label: str
-    max_uses: int = 2
-    used_count: int = 0
-    plan_days: int = 365
-    created_at: Optional[str] = None
+    status: Optional[LicenseStatus] = None
+    plan: Optional[LicensePlan | str] = None
+    price_inr: Optional[float] = None
+    valid_until: Optional[str] = None

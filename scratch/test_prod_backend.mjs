@@ -29,40 +29,40 @@ async function testBackend() {
   const chapLogin = await chapLoginRes.json()
   console.log('Chapter Admin Login Success:', chapLogin.success, 'Chapter:', chapLogin.session?.chapter?.name)
 
-  console.log('\n--- 4. Testing /api/licensing/create-order ---')
-  const orderRes = await fetch('http://localhost:5051/api/licensing/create-order', {
+  console.log('\n--- 4. Testing POST /api/payment (Create Payment Order) ---')
+  const orderRes = await fetch('http://localhost:5051/api/payment', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      chapterId: 'chap-titans',
-      planKey: 'ANNUAL',
+      chapter_id: 'chap-titans',
+      plan_key: 'ANNUAL',
     }),
   })
   const order = await orderRes.json()
-  console.log('Server Order Generated:', order.orderId, 'Amount (INR):', order.amount / 100, 'Server Signature:', order.serverSignature?.slice(0, 16) + '...')
+  const activeOrderId = order.order_id || order.orderId
+  console.log('Server Order Generated:', activeOrderId, 'Amount (INR):', order.amount / 100, 'Server Signature:', (order.server_signature || order.serverSignature)?.slice(0, 16) + '...')
 
-  console.log('\n--- 5. Testing /api/licensing/verify-payment ---')
+  console.log('\n--- 5. Testing PATCH /api/payment/{order_id} (Verify & Complete Payment) ---')
   const crypto = await import('node:crypto')
   const RAZORPAY_KEY_SECRET = 'ProximaSecretDevKey2026'
   const mockPayId = 'pay_verified_test_' + Date.now()
   const expectedSig = crypto
     .createHmac('sha256', RAZORPAY_KEY_SECRET)
-    .update(`${order.orderId}|${mockPayId}`)
+    .update(`${activeOrderId}|${mockPayId}`)
     .digest('hex')
 
-  const verifyRes = await fetch('http://localhost:5051/api/licensing/verify-payment', {
-    method: 'POST',
+  const verifyRes = await fetch(`http://localhost:5051/api/payment/${activeOrderId}`, {
+    method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      chapterId: 'chap-titans',
-      planKey: 'ANNUAL',
-      razorpayOrderId: order.orderId,
-      razorpayPaymentId: mockPayId,
-      razorpaySignature: expectedSig,
+      chapter_id: 'chap-titans',
+      plan_key: 'ANNUAL',
+      razorpay_payment_id: mockPayId,
+      razorpay_signature: expectedSig,
     }),
   })
   const verify = await verifyRes.json()
-  console.log('Payment Cryptographic Verification:', verify.success, 'Valid Until:', verify.license?.validUntil, 'Invoice Ref:', verify.invoice?.id)
+  console.log('Payment Cryptographic Verification:', verify.success, 'Valid Until:', verify.license?.valid_until || verify.license?.validUntil, 'Invoice Ref:', verify.invoice?.id)
 
   console.log('\n--- 6. Testing /api/members Roster Persistence ---')
   const syncRes = await fetch('http://localhost:5051/api/members/chap-titans', {

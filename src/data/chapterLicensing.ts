@@ -44,7 +44,9 @@ export const RENEWAL_PLANS: Record<RenewalPlanKey, RenewalPlanOption> = {
 
 // Official Test / Live Razorpay Key IDs
 export const DEFAULT_RAZORPAY_KEY_ID =
-  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_RAZORPAY_KEY_ID) ||
+  (typeof import.meta !== 'undefined' &&
+    import.meta.env &&
+    (import.meta.env.RAZORPAY_KEY_ID || import.meta.env.VITE_RAZORPAY_KEY_ID)) ||
   'rzp_test_ProximaDemo2026'
 
 /**
@@ -236,7 +238,7 @@ export interface RazorpayCheckoutOptions {
   adminPhone?: string
   planKey?: RenewalPlanKey
   keyId?: string
-  onSuccess: (paymentId: string, signature?: string, planKey?: RenewalPlanKey) => void
+  onSuccess: (paymentId: string, signature?: string, planKey?: RenewalPlanKey, orderId?: string) => void
   onDismiss?: () => void
   onFailure?: (error: Error) => void
 }
@@ -330,7 +332,7 @@ export async function launchRazorpaySubscriptionCheckout({
             } else {
               renewChapterLicense(chapter.id, payId, planKey)
             }
-            onSuccess(payId, sig, planKey)
+            onSuccess(payId, sig, planKey, ordId)
           },
           modal: {
             ondismiss: () => {
@@ -351,8 +353,9 @@ export async function launchRazorpaySubscriptionCheckout({
   // 3. Certified Sandbox Simulation Mode (Local Dev & Evaluation)
   console.log(`[Razorpay Gateway] Processing sandbox simulation for ${chosenPlan.name} (₹${chosenPlan.priceInr})...`)
   await new Promise((r) => setTimeout(r, 700))
-  const simulatedPayId = `pay_rzp_${Date.now().toString(36)}`
-  const simulatedSig = `sig_${Date.now().toString(36)}`
+  const simulatedPayId = `pay_sandbox_${Date.now().toString(36)}`
+  const simulatedSig = `sig_sandbox_${Date.now().toString(36)}`
+  const activeOrderId = serverOrder?.orderId || `order_sandbox_${Date.now().toString(36)}`
 
   if (serverOrder?.orderId) {
     const verifyResult = await verifyServerRazorpayPayment({
@@ -371,5 +374,5 @@ export async function launchRazorpaySubscriptionCheckout({
     renewChapterLicense(chapter.id, simulatedPayId, planKey)
   }
 
-  onSuccess(simulatedPayId, simulatedSig, planKey)
+  onSuccess(simulatedPayId, simulatedSig, planKey, activeOrderId)
 }

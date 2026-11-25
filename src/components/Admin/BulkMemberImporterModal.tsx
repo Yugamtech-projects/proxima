@@ -17,6 +17,10 @@ import { downloadRosterTemplate } from '../../utils/csvTemplate'
 import { parseMemberSpreadsheet } from '../../utils/spreadsheetParser'
 import type { SpreadsheetParseResult } from '../../utils/spreadsheetParser'
 import type { Member, Chapter } from '../../types/member'
+import {
+  importMemberRosterCsvOnServer,
+  fetchMembersFromServer,
+} from '../../services/proximaApi'
 
 interface BulkMemberImporterModalProps {
   isOpen: boolean
@@ -63,8 +67,30 @@ export const BulkMemberImporterModal: React.FC<BulkMemberImporterModalProps> = (
   }
 
   // Handle file drop or selection
-  const handleFileUpload = (file: File) => {
+  const handleFileUpload = async (file: File) => {
     if (!file) return
+
+    // Stream CSV directly to backend transactional endpoint
+    if (file.name.toLowerCase().endsWith('.csv')) {
+      setIsProcessing(true)
+      try {
+        const serverRes = await importMemberRosterCsvOnServer(chapter.id, file)
+        if (serverRes && serverRes.success && serverRes.importedCount > 0) {
+          const refreshed = await fetchMembersFromServer(chapter.id)
+          if (refreshed && refreshed.length > 0) {
+            onImportComplete(refreshed)
+            onClose()
+            return
+          }
+        }
+      } catch (err) {
+        console.warn('Backend CSV import fallback to local parser:', err)
+      } finally {
+        setIsProcessing(false)
+      }
+    }
+
+    // Client fallback: local spreadsheet parser
     const reader = new FileReader()
     reader.onload = (e) => {
       const content = e.target?.result as string

@@ -15,8 +15,11 @@ import {
   generateCatchupWhatsAppUrl,
   logNavigationToMember,
   logMeetingWithMember,
+  getInteractionHistory,
+  getMemberMeetingStatus,
   type NearbyOpportunity,
 } from '../../services/viewerIdentity'
+import { fetchNearbyRadarMembers } from '../../services/proximaApi'
 
 interface TripMultiplierModalProps {
   isOpen: boolean
@@ -48,6 +51,39 @@ export const TripMultiplierModal: React.FC<TripMultiplierModalProps> = ({
       2.0 // scan within 2km radius around primary member's office
     )
   )
+
+  // Query server-side PostGIS spatial engine for en-route networking opportunities
+  React.useEffect(() => {
+    if (!isOpen || !primaryMember.location?.latitude || !primaryMember.location?.longitude) return
+
+    fetchNearbyRadarMembers({
+      latitude: primaryMember.location.latitude,
+      longitude: primaryMember.location.longitude,
+      radiusKm: 2.5,
+      chapterId,
+    })
+      .then((res) => {
+        if (res && res.members && res.members.length > 0) {
+          const filtered = res.members.filter((m) => m.id !== primaryMember.id)
+          if (filtered.length > 0) {
+            const history = getInteractionHistory(chapterId, viewerName)
+            const mapped: NearbyOpportunity[] = filtered.map((m) => {
+              const statusInfo = getMemberMeetingStatus(history[m.id])
+              return {
+                member: m,
+                distanceKm: m.distanceKm,
+                distanceMeters: Math.round(m.distanceKm * 1000),
+                status: statusInfo.status,
+                daysSinceLastMet: statusInfo.daysSinceLastMet,
+                label: statusInfo.label,
+              }
+            })
+            setOpportunities(mapped)
+          }
+        }
+      })
+      .catch(() => {})
+  }, [isOpen, primaryMember.id, primaryMember.location?.latitude, primaryMember.location?.longitude, chapterId, viewerName])
 
   const [loggedMetIds, setLoggedMetIds] = useState<Set<string>>(new Set())
 

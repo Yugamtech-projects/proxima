@@ -151,7 +151,7 @@ export const CreateChapterModal: React.FC<CreateChapterModalProps> = ({
         },
         adminEmail: adminLoginId.includes('@') ? adminLoginId : `${adminLoginId}@proxima.network`,
         planKey: selectedPlanKey,
-        onSuccess: async (paymentId, signature) => {
+        onSuccess: async (paymentId, signature, _planKey, orderId) => {
           const onboardRes = await onboardChapterWithServer({
             chapterName: chapterName.trim(),
             city: city.trim(),
@@ -161,6 +161,7 @@ export const CreateChapterModal: React.FC<CreateChapterModalProps> = ({
             planKey: selectedPlanKey,
             razorpayPaymentId: paymentId,
             razorpaySignature: signature,
+            razorpayOrderId: orderId,
           })
 
           if (onboardRes.success && onboardRes.chapter) {
