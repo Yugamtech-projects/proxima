@@ -64,9 +64,9 @@ async def global_exception_handler(request: Request, exc: Exception) -> JSONResp
         return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
 
     ref_id = f"err_{generate_secure_token(nbytes=6)}"
-    logger.error(
-        "Unhandled server error intercepted | ref_id=%s, path=%s, method=%s, exc=%s",
-        ref_id, request.url.path, request.method, str(exc), exc_info=True,
+    logger.exception(
+        "Unhandled server error intercepted | ref_id=%s, path=%s, method=%s",
+        ref_id, request.url.path, request.method,
     )
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

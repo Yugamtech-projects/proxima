@@ -30,7 +30,8 @@ AUTH_ATTEMPT_LOGS_TABLE: str = f'"{DATABASE_SCHEMA}".auth_attempt_logs'
 
 JWT_SECRET: str = os.getenv("JWT_SECRET")
 JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))
+raw_expire = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
+ACCESS_TOKEN_EXPIRE_MINUTES: int = int(raw_expire.strip()) if raw_expire and raw_expire.strip().isdigit() else 1440
 
 RAZORPAY_KEY_ID: str = os.getenv("RAZORPAY_KEY_ID")
 RAZORPAY_KEY_SECRET: str = os.getenv("RAZORPAY_KEY_SECRET")

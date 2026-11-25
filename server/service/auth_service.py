@@ -103,11 +103,14 @@ class AuthService:
                 }
 
         # 6. Generate 24-hour stateless JWT token with token_version for instant revocation
+        raw_version = user.get("token_version")
+        token_version = int(raw_version) if raw_version is not None else 1
+
         token_payload = {
             "sub": user["email"],
             "role": user["role"],
             "chapter_id": user.get("chapter_id"),
-            "ver": int(user.get("token_version", 1)),
+            "ver": token_version,
         }
         token = create_access_token(data=token_payload)
 
